@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "handPrompted-moon",
+  "infra": "monorepo",
+  "workspaces": [
+    "apps/*"
+  ],
+  "packageManager": "bun@1.1.20"
+}

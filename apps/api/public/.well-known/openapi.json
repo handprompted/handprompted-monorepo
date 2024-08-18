@@ -1,0 +1,354 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "GPT Control",
+    "description": "API to let GPT remotely control your machine.",
+    "contact": {
+      "name": "Saulo Vallory",
+      "url": "https://saulo.engineer",
+      "email": "me@saulo.engineer"
+    },
+    "license": {
+      "url": "https://opensource.org/license/mit",
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://gpt.saulo.engineer",
+      "description": "Main server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Item": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "file",
+              "directory"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "file"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        }
+      },
+      "Directory": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "directory"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Item"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "FileTree": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/File"
+            },
+            {
+              "$ref": "#/components/schemas/Directory"
+            }
+          ]
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/list-files": {
+      "post": {
+        "x-openai-isConsequential": false,
+        "operationId": "listFiles",
+        "summary": "List all files and directories recursively.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "description": "Relative path to the directory (default is the current directory)."
+                  },
+                  "authCode": {
+                    "type": "string",
+                    "description": "Authorization Code for API access."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A list of files and directories.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileTree"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-file": {
+      "post": {
+        "x-openai-isConsequential": false,
+        "operationId": "getFile",
+        "summary": "Get contents of a file.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "description": "Relative path to the file."
+                  },
+                  "authCode": {
+                    "type": "string",
+                    "description": "Authorization Code for API access."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contents of the file.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/write-file": {
+      "post": {
+        "x-openai-isConsequential": false,
+        "operationId": "writeFile",
+        "summary": "Write or overwrite a file.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "description": "The path of the file to write or overwrite."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The content to write into the file."
+                  },
+                  "authCode": {
+                    "type": "string",
+                    "description": "Authorization Code for API access."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "File written successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actions": {
+      "get": {
+        "x-openai-isConsequential": false,
+        "operationId": "listActions",
+        "summary": "List all available actions. The AI assistant uses this endpoint to discovered what actions are available.",
+        "responses": {
+          "200": {
+            "description": "A list of all available endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string"
+                      },
+                      "method": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "x-openai-isConsequential": false,
+        "operationId": "executeAction",
+        "summary": "Executes the specified action as if it was called directly. When the assistant does not know how to directly execute an action, it will use this endpoint to try to execute it dynamically.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "routeName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response from the executed route."
+          },
+          "404": {
+            "description": "Route not found."
+          }
+        }
+      }
+    }
+  }
+}

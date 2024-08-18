@@ -1,0 +1,10 @@
+FROM node:latest
+
+# Install moon cli
+RUN npm install -g @moonrepo/cli
+
+WORKDIR /app
+
+EXPOSE 3000 8080
+
+CMD ["moon", ":dev"]

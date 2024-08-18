@@ -1,0 +1,29 @@
+{
+  "name": "api",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts",
+    "start": "NODE_ENV=production bun src/index.ts",
+    "compile": "bun build ./src/server.ts --compile --outfile gpt-remote",
+    "test": "bun test",
+    "lint": "eslint . --ext .ts",
+    "release": "standard-version"
+  },
+  "dependencies": {
+    "@bogeychan/elysia-logger": "^0.1.1",
+    "@elysiajs/bearer": "^1.1.1",
+    "@elysiajs/cors": "^1.1.0",
+    "@elysiajs/static": "^1.1.0",
+    "@elysiajs/swagger": "^1.1.0",
+    "bun": "^1.1.24",
+    "elysia": "^1.1.3",
+    "elysia-autoroutes": "^0.5.0",
+    "elysia-helmet": "^2.0.0",
+    "elysia-rate-limit": "^4.1.0"
+  },
+  "devDependencies": {
+    "bun-types": "^1.1.20"
+  },
+  "module": "src/index.js"
+}

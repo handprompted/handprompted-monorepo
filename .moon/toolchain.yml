@@ -1,0 +1,6 @@
+# Enable Bun + Typescript
+bun:
+  version: '^1.1.20'
+typescript: 
+  syncProjectReferences: true
+  includeProjectReferenceSources: true
